@@ -95,7 +95,7 @@ export const graphQlSchema = buildSchema(`
     getPostById(id: ID): Post
     geMemberTypeById(id: ID): MemberType
     getUsersWithAllData: [UserWithAllData]
-    getAUserWithAllDataById(id: ID): UserWithAllData
+    getAllUserWithAllDataById(id: ID): UserWithAllData
     getUserWithProfile: [UserWithProfile]
     getUserWithPosts(id: ID): [UserWithPosts]
     getUsersWithAllFollowers: [UserWithFollowersWhoFollowHim]

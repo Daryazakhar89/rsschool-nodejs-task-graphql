@@ -30,52 +30,79 @@ export class Resolver {
 
       getAllMemberTypes: () => this.fastify.db.memberTypes.findMany(),
 
-      getUserById: ({ id }: { id : string}) => this.fastify.db.users.findOne({ key: 'id', equals: id }),
+      getUserById: ({ id }: { id: string }) =>
+        this.fastify.db.users.findOne({ key: 'id', equals: id }),
 
-      getProfileById: ({ id }: { id : string}) => this.fastify.db.profiles.findOne({ key: 'id', equals: id }),
+      getProfileById: ({ id }: { id: string }) =>
+        this.fastify.db.profiles.findOne({ key: 'id', equals: id }),
 
-      getPostById: ({ id }: { id : string}) => this.fastify.db.posts.findOne({ key: 'id', equals: id }),
+      getPostById: ({ id }: { id: string }) =>
+        this.fastify.db.posts.findOne({ key: 'id', equals: id }),
 
-      geMemberTypeById: ({ id }: { id : string}) => this.fastify.db.memberTypes.findOne({ key: 'id', equals: id }),
+      geMemberTypeById: ({ id }: { id: string }) =>
+        this.fastify.db.memberTypes.findOne({ key: 'id', equals: id }),
 
-      createUser: ({ user: data } : { user: CreateUserDTO}) => this.fastify.db.users.create(data),
+      createUser: ({ user: data }: { user: CreateUserDTO }) =>
+        this.fastify.db.users.create(data),
 
-      createProfile: ({ profile: data } : { profile: CreateProfileDTO }) => this.fastify.db.profiles.create(data),
+      createProfile: ({ profile: data }: { profile: CreateProfileDTO }) =>
+        this.fastify.db.profiles.create(data),
 
-      createPost: ({ post: data } : { post: CreatePostDTO} ) => this.fastify.db.posts.create(data),
+      createPost: ({ post: data }: { post: CreatePostDTO }) =>
+        this.fastify.db.posts.create(data),
 
-      updateUser: (id: string, data: ChangeUserDTO) => this.fastify.db.users.change(id, data),
+      updateUser: ({ id, update: data } : {id: string, update: ChangeUserDTO }) =>
+        this.fastify.db.users.change(id, data),
 
-      updateProfile: (id: string, data: ChangeProfileDTO) => this.fastify.db.profiles.change(id, data),
+      updateProfile: ({ id, update: data } : {id: string, update: ChangeProfileDTO }) =>
+        this.fastify.db.profiles.change(id, data),
 
-      updatePost: (id: string, data: ChangePostDTO) => this.fastify.db.posts.change(id, data),
+      updatePost: ({ id, update: data } : {id: string, update: ChangePostDTO }) =>
+        this.fastify.db.posts.change(id, data),
 
-      updateMemberType: (id: string, data: ChangeMemberTypeDTO) => this.fastify.db.memberTypes.change(id, data),
+      updateMemberType: ({ id, update: data } : {id: string, update: ChangeMemberTypeDTO }) =>
+        this.fastify.db.memberTypes.change(id, data),
 
       getUsersWithAllData: async () => {
         const users = await this.resolvers.getAllUsers();
 
         return await users.map(async (user: UserEntity) => {
-          const userPosts = await this.fastify.db.posts.findMany({
-            key: "userId",
-            equals: user.id
-          });
-          const userProfiles = await this.fastify.db.profiles.findMany({
-            key: "userId",
-            equals: user.id
-          });
-          const profileMemberTypes = userProfiles.map((profile) => profile.memberTypeId);
-
-          return {
-            ...user,
-            posts: userPosts,
-            profiles: userProfiles,
-            memberTypes: profileMemberTypes
-          };
+          return await this.getAllUserDataById(user);
         });
-      }
+      },
+
+      getAllUserWithAllDataById: async (id: string) => {
+        const user = await this.resolvers.getUserById(id);
+        let userCompleteData = {};
+
+        if (user) {
+          userCompleteData = await this.getAllUserDataById(user);
+        }
+
+        return userCompleteData;
+      },
     };
-    
+  }
+
+  async getAllUserDataById(user: UserEntity) {
+    const userPosts = await this.fastify.db.posts.findMany({
+      key: 'userId',
+      equals: user.id,
+    });
+    const userProfiles = await this.fastify.db.profiles.findMany({
+      key: 'userId',
+      equals: user.id,
+    });
+    const profileMemberTypes = userProfiles.map(
+      (profile) => profile.memberTypeId
+    );
+
+    return {
+      ...user,
+      posts: userPosts,
+      profiles: userProfiles,
+      memberTypes: profileMemberTypes,
+    };
   }
 
   getResolvers() {
